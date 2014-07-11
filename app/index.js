@@ -21,8 +21,6 @@ var ModuleGenerator = yeoman.generators.Base.extend({
   },
 
   askFor: function () {
-    
-    //console.log(fileNameString);
     var obj = this;
     var done = this.async();
     // Have Yeoman greet the user.
@@ -62,50 +60,38 @@ var ModuleGenerator = yeoman.generators.Base.extend({
       this.template("_main.js", fileNameString, context1);
 
       
+      var destinationPath = obj.destinationRoot() + "/config.js";
+      var indexFile = obj.readFileAsString(destinationPath);
+      var startPositionOfRequire = indexFile.indexOf("require.config(");
+      var stringInRequire = indexFile.substring(startPositionOfRequire+("require.config(").length);
+      //console.log(stringInRequire);
+      stringInRequire=stringInRequire.split(");");
+      //console.log(stringInRequire[0]);
       
+      //extracting path from the above string
       
-      // });
+      var appVersion = "";      //temporarily defining appVersion just to eval.
+      var objectInRequire = eval("("+stringInRequire[0]+ ")");
+      //console.log(stringInRequire);
+
+      var stringToInsert = "objectInRequire.paths." + moduleNameString + " = " + "'" + moduleNameString + "'";
+      var stringToInsertInPackage = "objectInRequire.packages.push('"+moduleNameString+"')" 
+      eval(stringToInsert);
+      eval(stringToInsertInPackage);
+
+      var stringInObjectInRequire = JSON.stringify(objectInRequire,null,'\t');
+
+      context1 = {
+        requireConfig: stringInObjectInRequire
+      };
+      this.template("_config.js","config.js", context1);
+
       done();
     }.bind(this));
   },
 
    addModuletoModule_json: function () {
-      // var flagToCheckModule = 0;
-      // var indexFile = this.readFileAsString(fileNameString);
-      // var startPositionOfDefine = indexFile.indexOf("define([");
-      // var stringInDefine = indexFile.substring(startPositionOfDefine+8);
-      // var stringInDefine = stringInDefine.split(']');
-      // console.log(stringInDefine[0]);   // get the string in the define function to replace it with a new text, for the controller.
-      // this is the code for controller and directive.
-      
-
-
-
-
-
-      //var stringToInsert = ","+"'./"+fileNameString+"'"+"\n"+"//yeoman_hook";
-      //console.log(indexFile);
-      //var res = indexFile.replace("//yeoman_hook", stringToInsert);
-      
-      // try
-      // {
-      //   var destinationPath = this.destinationRoot() + "/modules.json";
-      //   this.read(destinationPath);
-      // }
-      // catch(err)
-      // {
-      //   this.write("modules.json",fileName);
-      //   flagToCheckModule=1;
-      // }
-      // finally
-      // {
-      //   if(flagToCheckModule==0)
-      //   {
-      //     var indexFile = this.readFileAsString("modules.json");
-      //      indexFile = indexFile.concat("\n"+fileName);
-      //      this.write("modules.json",indexFile);
-      //   }
-      // }
+      console.log("addModuletoModule_json");
     }
 });
 
