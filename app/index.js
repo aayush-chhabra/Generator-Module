@@ -13,18 +13,13 @@ var fileName;
 var ModuleGenerator = yeoman.generators.Base.extend({
   init: function () {
     this.pkg = require('../package.json');
-    // this.on('end', function () {
-    //   if (!this.options['skip-install']) {
-    //     this.installDependencies();
-    //   }
-    // });
   },
 
   askFor: function () {
     var obj = this;
     var done = this.async();
     // Have Yeoman greet the user.
-    this.log(yosay('Welcome to the Cengage Module generator!'));
+    this.log(yosay('Welcome!! This generator creates a seperate angular module'));
 
     var prompts = [{
       type: 'input',
@@ -39,17 +34,19 @@ var ModuleGenerator = yeoman.generators.Base.extend({
       fileNameString = this.nameModule;
       fileNameString = fileNameString.split(' ').join('-');
       fileNameString=fileNameString.concat("-Module");
+      fileNameString = 'app/static/js/' + fileNameString;
       moduleNameString = this.nameModule;
       moduleNameString =  moduleNameString.split(' ').join('');
       moduleNameString=moduleNameString.concat("Module");
       this.mkdir(fileNameString);
+      this.copy('_templates.js',fileNameString+'/templates.js')
       fileNameString1 = fileNameString+"/module.js";
       var context = { 
         moduleNameString1: moduleNameString 
       };
       this.template('_module.js', fileNameString1,context);
       fileName = fileNameString;
-      console.log(fileName);
+      //console.log(fileName);
       fileNameString = fileNameString+"/main.js";
       //var moduleNameString2;
       var temp = "'./module',\n\t'./templates'";
@@ -60,8 +57,9 @@ var ModuleGenerator = yeoman.generators.Base.extend({
       this.template("_main.js", fileNameString, context1);
 
       
-      var destinationPath = obj.destinationRoot() + "/config.js";
+      var destinationPath = obj.destinationRoot() + '/app/static/js/' + "config.js";
       var indexFile = obj.readFileAsString(destinationPath);
+      //console.log(indexFile);
       var startPositionOfRequire = indexFile.indexOf("require.config(");
       var stringInRequire = indexFile.substring(startPositionOfRequire+("require.config(").length);
       //console.log(stringInRequire);
@@ -75,7 +73,7 @@ var ModuleGenerator = yeoman.generators.Base.extend({
       //console.log(stringInRequire);
 
       var stringToInsert = "objectInRequire.paths." + moduleNameString + " = " + "'" + moduleNameString + "'";
-      var stringToInsertInPackage = "objectInRequire.packages.push('"+moduleNameString+"')" 
+      var stringToInsertInPackage = "objectInRequire.packages.push('"+moduleNameString+"')"; 
       eval(stringToInsert);
       eval(stringToInsertInPackage);
 
@@ -84,8 +82,9 @@ var ModuleGenerator = yeoman.generators.Base.extend({
       context1 = {
         requireConfig: stringInObjectInRequire
       };
-      this.template("_config.js","config.js", context1);
-
+      this.template("_config.js","app/static/js/config.js", context1);
+      this.template("_config.build.js","app/static/js/config.build.js", context1);
+      this.mkdir("test/spec/"+fileNameString);
       done();
     }.bind(this));
   },
